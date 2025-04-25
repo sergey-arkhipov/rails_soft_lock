@@ -3,11 +3,10 @@
 require "zeitwerk"
 loader = Zeitwerk::Loader.for_gem
 loader.setup
-require "rails_soft_lock/configuration"
 
-# RailsSoftLock - module for soft lock Active Records by attribute
+# RailsSoftLock - module for soft lock ApplicationRecord by attribyte
 module RailsSoftLock
-  # Error clss for gem
+  # Error class for gem
   class Error < StandardError; end
 
   def self.lock_manager(object_name:, object_key: nil, object_value: nil)
@@ -18,7 +17,7 @@ module RailsSoftLock
     )
   end
 
-  # Делегирование методов к адаптеру
+  # Pass methods to adapter
   def self.get(object_name, object_key)
     lock_manager(object_name: object_name, object_key: object_key).locked_by
   end

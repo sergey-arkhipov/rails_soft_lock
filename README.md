@@ -1,28 +1,89 @@
 # RailsSoftLock
 
-TODO: Delete this and the text below, and describe your gem
-
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/rails_soft_lock`. To experiment with that code, run `bin/console` for an interactive prompt.
+This gem implements the ability to lock Rails Active Records using adapters for in-memory databases, such as redis, nats, etc.
+Locks can be done by using the active record attribute.
+it is possible to define the uniqueness scope of the attribute.
+The gem is under active development.
+Currently, an adapter to redis-compatible databases, such as redis, walkey, etc., has been implemented.
 
 ## Installation
 
-TODO: Replace `UPDATE_WITH_YOUR_GEM_NAME_IMMEDIATELY_AFTER_RELEASE_TO_RUBYGEMS_ORG` with your gem name right after releasing it to RubyGems.org. Please do not do it earlier due to security reasons. Alternatively, replace this section with instructions to install your gem from git if you don't plan to release to RubyGems.org.
-
-Install the gem and add to the application's Gemfile by executing:
+Install the gem and add to the application's Gemfile:
 
 ```bash
-bundle add UPDATE_WITH_YOUR_GEM_NAME_IMMEDIATELY_AFTER_RELEASE_TO_RUBYGEMS_ORG
+gem "rails_soft_lock", git: "https://github.com/sergey-arkhipov/rails_soft_lock.git"
+
 ```
 
-If bundler is not being used to manage dependencies, install the gem by executing:
+After run
 
 ```bash
-gem install UPDATE_WITH_YOUR_GEM_NAME_IMMEDIATELY_AFTER_RELEASE_TO_RUBYGEMS_ORG
+bundle install
 ```
+
+Run rake task
+
+```bash
+rake rails_soft_lock:install
+
+```
+
+This will install config for gem, if file does not exists
+
+```ruby
+## config/initializers/rails_soft_lock.rb
+# frozen_string_literal: true
+
+# Configuration for RailsSoftLock gem
+# This file sets up the adapter and options for soft locking Active Record models
+require "rails_soft_lock"
+RailsSoftLock.configure do |config|
+  # Specify the adapter for storing locks
+  config.adapter = :redis
+
+  # Configuration for the Redis adapter
+  config.adapter_options = {
+    redis: Rails.application.config_for(:redis).merge(
+      timeout: 5
+    )
+  }
+```
+
+You can add any modification there.
+
+Gem use ConnectionPool inside for safety connect to Redis adapter (now inplemented)
 
 ## Usage
 
-TODO: Write usage instructions here
+Gem assumes that the User model is used to determine the user who sets the lock.
+
+Model < ApplicationRecord should include `RailsSoftLock::ModelExtensions`
+and `acts_as_locked_by` with `acts_as_locked_scope` should be set, for example
+
+```ruby
+class Article < ApplicationRecord
+  include RailsSoftLock::ModelExtensions
+
+  acts_as_locked_by(:attribyte)
+  acts_as_locked_scope(proc { :scoped_attribute || "none" })
+
+```
+
+See `spec/rails_soft_lock/model_extensions_spec.rb for implemented methods`
+
+### Attention
+
+Pay attention how method `locak_or_find` work
+
+Method return hash
+`has_locked: false, locked_by: user.id`
+
+`has_lock`: false implies that there was no lock on the passed object before this point.
+Not to be confused with the result of executing the lock itself.
+Since this is an in-memory base and the goal is quick and easy access, the method sets the lock,
+reports that there was no lock before, and returns the user of the lock.
+If there was a lock, true is returned and the user of this current lock.
+The lock itself is not changed.
 
 ## Development
 

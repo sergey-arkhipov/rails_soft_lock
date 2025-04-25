@@ -8,16 +8,16 @@ Gem::Specification.new do |spec|
   spec.authors = ["Sergey Arkhipov", "Vladimir Peskov"]
   spec.email = ["Sergey-Arkhipov@yandex.ru", "vpeskov@niomed.ru"]
 
-  spec.summary = "TODO: Write a short summary, because RubyGems requires one."
-  spec.description = "TODO: Write a longer description or delete this line."
-  spec.homepage = "TODO: Put your gem's website or public repo URL here."
+  spec.summary = "Lock Active record by attribyte using in-memory adapters"
+  spec.description = "Using In-Memory Databases to Work with Rails Active Record Locks"
+  spec.homepage = "https://github.com/sergey-arkhipov/rails_soft_lock"
   spec.license = "MIT"
   spec.required_ruby_version = ">= 3.3.0"
 
-  spec.metadata["allowed_push_host"] = "TODO: Set to your gem server 'https://example.com'"
+  spec.metadata["allowed_push_host"] = ""
 
   spec.metadata["homepage_uri"] = spec.homepage
-  spec.metadata["source_code_uri"] = "TODO: Put your gem's public repo URL here."
+  spec.metadata["source_code_uri"] = "https://github.com/sergey-arkhipov/rails_soft_lock"
   spec.metadata["changelog_uri"] = "TODO: Put your gem's CHANGELOG.md URL here."
 
   # Specify which files should be added to the gem when it is released.
@@ -29,11 +29,11 @@ Gem::Specification.new do |spec|
         f.start_with?(*%w[bin/ test/ spec/ features/ .git .github appveyor Gemfile])
     end
   end
-  spec.bindir = "exe"
+  spec.bindir = "lib"
   spec.executables = spec.files.grep(%r{\Aexe/}) { |f| File.basename(f) }
   spec.require_paths = ["lib"]
 
-  spec.add_dependency "connection_pool"
+  spec.add_dependency "connection_pool", "~>2.5"
   spec.add_dependency "zeitwerk", "~> 2.7"
 
   # For more information and examples about making a new gem, check out our
