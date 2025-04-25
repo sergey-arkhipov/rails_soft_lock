@@ -1,0 +1,68 @@
+# frozen_string_literal: true
+
+# lib/rails_soft_lock/redis_adapter.rb
+
+require "redis"
+require "connection_pool"
+
+module RailsSoftLock
+  # Adapter for store lock in redis
+  module RedisAdapter
+    # Initialize Redis client
+    def redis_client # rubocop:disable Metrics/MethodLength
+      @redis_client ||= begin
+        redis_config = RailsSoftLock.configuration.adapter_options.fetch(:redis, {})
+
+        # Set config defaults
+        defaults = {
+          url: "redis://localhost:6379/0",
+          timeout: 5
+        }
+        # Merge config options
+        config = defaults.merge(redis_config)
+
+        ConnectionPool::Wrapper.new do
+          Redis.new(**config)
+        end
+      rescue Redis::CannotConnectError => e
+        raise RailsSoftLock::Error, "Failed to connect to Redis: #{e.message}"
+      end
+    end
+
+    # Retrieves a value by key from the specified hash
+    # @return [String, nil] The value associated with the key
+    def get
+      redis_client.hget(@object_name, @object_key)
+    end
+
+    # Creates a new key-value pair if the key does not exist
+    # @return [Boolean] true if the key was created, false if it already existed
+    def create
+      result = redis_client.multi do |transaction|
+        transaction.hsetnx(@object_name, @object_key, @object_value)
+        transaction.hget(@object_name, @object_key)
+      end
+      !result.first # has_locked - false id created
+    end
+
+    # Updates the value for an existing key or creates a new key-value pair
+    # @return [Boolean] true if the key was updated, false if it was created
+    def update
+      result = redis_client.hset(@object_name, @object_key, @object_value)
+      result.zero?
+    end
+
+    # Deletes a key from the specified hash
+    # @return [Boolean] true if the key was deleted, false if it did not exist
+    def delete
+      result = redis_client.hdel(@object_name, @object_key)
+      !result.zero?
+    end
+
+    # Retrieves all key-value pairs in the specified hash
+    # @return [Hash] The key-value pairs in the hash
+    def all
+      redis_client.hgetall(@object_name)
+    end
+  end
+end

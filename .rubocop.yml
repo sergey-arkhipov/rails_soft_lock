@@ -1,0 +1,20 @@
+AllCops:
+  NewCops: enable
+
+plugins:
+  - rubocop-rake
+  - rubocop-rspec
+  - rubocop-rails
+  - rubocop-rspec_rails
+
+Style/StringLiterals:
+  EnforcedStyle: double_quotes
+
+Style/StringLiteralsInInterpolation:
+  EnforcedStyle: double_quotes
+
+RSpec/ExampleLength:
+  Max: 8
+
+Rails/ApplicationRecord:
+  Enabled: false
