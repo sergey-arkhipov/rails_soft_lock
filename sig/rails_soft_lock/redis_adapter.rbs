@@ -1,0 +1,29 @@
+module RailsSoftLock
+  # Adapter for store lock in redis
+  module RedisAdapter
+    @redis_client: untyped
+
+    # Initialize Redis client
+    def redis_client: () -> untyped
+
+    # Retrieves a value by key from the specified hash
+    # @return [String, nil] The value associated with the key
+    def get: () -> untyped
+
+    # Creates a new key-value pair if the key does not exist
+    # @return [Boolean] true if the key was created, false if it already existed
+    def create: () -> untyped
+
+    # Updates the value for an existing key or creates a new key-value pair
+    # @return [Boolean] true if the key was updated, false if it was created
+    def update: () -> untyped
+
+    # Deletes a key from the specified hash
+    # @return [Boolean] true if the key was deleted, false if it did not exist
+    def delete: () -> untyped
+
+    # Retrieves all key-value pairs in the specified hash
+    # @return [Hash] The key-value pairs in the hash
+    def all: () -> untyped
+  end
+end

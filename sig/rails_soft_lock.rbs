@@ -1,4 +1,17 @@
+# RailsSoftLock - module for soft lock ApplicationRecord by attribyte
 module RailsSoftLock
-  VERSION: String
-  # See the writing guide of rbs: https://github.com/ruby/rbs#guides
+  self.@lock_manager: untyped
+
+  # Error class for gem
+  class Error < StandardError
+  end
+
+  def self.lock_manager: (object_name: untyped, ?object_key: untyped?, ?object_value: untyped?) -> untyped
+
+  # Pass methods to adapter
+  def self.get: (untyped object_name, untyped object_key) -> untyped
+
+  def self.create: (untyped object_name, untyped object_key, untyped object_value) -> untyped
+
+  def self.update: (untyped object_name, untyped object_key, untyped object_value) -> untyped
 end

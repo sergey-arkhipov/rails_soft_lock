@@ -1,0 +1,50 @@
+# lib/rails_soft_lock/configuration.rb
+module RailsSoftLock
+  self.@configuration: untyped
+
+  # Configuration class for RailsSoftLock gem.
+  class Configuration
+    @adapter: untyped
+
+    @adapter_options: untyped
+
+    @acts_as_locked_by: untyped
+
+    @acts_as_locked_scope: untyped
+
+    # List of supported adapters.
+    VALID_ADAPTERS: ::Array[:redis | :nats | :memcached]
+
+    attr_reader adapter: untyped
+
+    attr_accessor adapter_options: untyped
+
+    attr_accessor acts_as_locked_by: untyped
+
+    attr_accessor acts_as_locked_scope: untyped
+
+    def initialize: () -> void
+
+    def []: (untyped key) -> untyped
+
+    def []=: (untyped key, untyped value) -> untyped
+
+    # Sets the adapter and validates it.
+    # @param value [Symbol] The adapter to use.
+    # @raise [ArgumentError] If the adapter is not supported.
+    def adapter=: (untyped value) -> untyped
+  end
+
+  # Configures the RailsSoftLock gem with a block.
+  # @yield [config] Yields the configuration object to the block.
+  # @return [void]
+  def self.configure: () ?{ (untyped) -> untyped } -> untyped
+
+  # Returns the current configuration instance.
+  # @return [Configuration] The configuration object.
+  def self.configuration: () -> untyped
+
+  # Resets the configuration (useful for testing).
+  # @return [void]
+  def self.reset_configuration: () -> untyped
+end

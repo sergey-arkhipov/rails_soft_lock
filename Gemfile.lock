@@ -2,7 +2,7 @@ PATH
   remote: .
   specs:
     rails_soft_lock (0.1.0)
-      connection_pool
+      connection_pool (~> 2.5)
       zeitwerk (~> 2.7)
 
 GEM

@@ -25,7 +25,7 @@ RSpec.describe RailsSoftLock::ModelExtensions do
   let(:object_value) { user.id.to_s }
 
   before do
-    # Настраиваем конфигурацию для Redis
+    # Setup Redis configuration
     RailsSoftLock.configure do |config|
       config.adapter = :redis
       config.adapter_options = {
@@ -36,16 +36,16 @@ RSpec.describe RailsSoftLock::ModelExtensions do
       }
     end
 
-    # Очищаем Redis перед каждым тестом
+    # Cleared Redis before each test
     redis = Redis.new(url: ENV["REDIS_URL"] || "redis://localhost:6379/0")
     redis.del(object_name)
 
-    # Настраиваем acts_as_locked_by
+    # Setup acts_as_locked_by
     TestModel.acts_as_locked_by(:lock_attribute)
   end
 
   after do
-    # Сбрасываем конфигурацию после каждого теста
+    # Reset configuration after each test
     RailsSoftLock.send(:reset_configuration)
   end
 
