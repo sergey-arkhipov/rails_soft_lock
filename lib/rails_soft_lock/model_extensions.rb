@@ -55,7 +55,7 @@ module RailsSoftLock
 
       def locked_by
         user_id = base_lock_object.locked_by&.to_i
-        user_id ? User.find_by(id: user_id) : nil
+        user_id ? RailsSoftLock.configuration.locked_by_class.find_by(id: user_id) : nil
       end
 
       def object_key
