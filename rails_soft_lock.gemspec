@@ -6,7 +6,7 @@ Gem::Specification.new do |spec|
   spec.name = "rails_soft_lock"
   spec.version = RailsSoftLock::VERSION
   spec.authors = ["Sergey Arkhipov", "Vladimir Peskov"]
-  spec.email = ["Sergey-Arkhipov@yandex.ru", "vpeskov@niomed.ru"]
+  spec.email = ["Sergey-Arkhipov@yandex.ru"]
 
   spec.summary = "Lock Active record by attribyte using in-memory adapters"
   spec.description = "Using In-Memory Databases to Work with Rails Active Record Locks"
@@ -14,11 +14,9 @@ Gem::Specification.new do |spec|
   spec.license = "MIT"
   spec.required_ruby_version = ">= 3.3.0"
 
-  spec.metadata["allowed_push_host"] = ""
-
   spec.metadata["homepage_uri"] = spec.homepage
   spec.metadata["source_code_uri"] = "https://github.com/sergey-arkhipov/rails_soft_lock"
-  spec.metadata["changelog_uri"] = "TODO: Put your gem's CHANGELOG.md URL here."
+  spec.metadata["changelog_uri"] = "https://github.com/sergey-arkhipov/rails_soft_lock"
 
   # Specify which files should be added to the gem when it is released.
   # The `git ls-files -z` loads the files in the RubyGem that have been added into git.
