@@ -58,7 +58,7 @@ Gem use ConnectionPool inside for safety connect to Redis adapter (now inplement
 Gem assumes that the User model is used to determine the user who sets the lock.
 
 Another model for setting the attribute of the blocking user can be specified in the configuration.
-The model ID is used for blocking
+The model ID is used for blocking.
 
 ```ruby
 RailsSoftLock.configure do |config|
