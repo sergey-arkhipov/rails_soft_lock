@@ -9,7 +9,7 @@ ActiveRecord::Base.establish_connection(
   database: ":memory:"
 )
 
-# Создаём таблицы для User и TestModel
+# Create tables for  User and TestModel
 ActiveRecord::Schema.define do
   create_table :users, force: true, &:timestamps
 

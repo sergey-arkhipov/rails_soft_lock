@@ -34,7 +34,7 @@ namespace :rails_soft_lock do
                 # config.acts_as_locked_scope = -> { "default_scope" }
 
                 # (Optional) Model class for locked_by lookups
-                # config.locked_by_class = User
+                # config.locked_by_class = "User"
               end
       RUBY
       puts "Created RailsSoftLock configuration file at #{initializer_path}"
