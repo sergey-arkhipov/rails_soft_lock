@@ -16,7 +16,8 @@ jobs:
     strategy:
       matrix:
         ruby:
-          - "3.4.1"
+          - "3.4"
+          - "3.3"
 
     services:
       redis:
