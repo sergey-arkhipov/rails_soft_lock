@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
+# lib/rails_soft_lock.rb
+
 require "zeitwerk"
-loader = Zeitwerk::Loader.for_gem
-loader.setup
 
 # RailsSoftLock - module for soft lock ApplicationRecord by attribyte
 module RailsSoftLock
@@ -30,6 +30,35 @@ module RailsSoftLock
     lock_manager(object_name: object_name, object_key: object_key, object_value: object_value).lock_or_find
   end
 
+  class << self
+    # Configures the RailsSoftLock gem with a block.
+    # @yield [config] Yields the configuration object to the block.
+    # @return [void]
+    def configure
+      @configuration ||= Configuration.new
+      if block_given?
+        yield(@configuration)
+      else
+        warn "[RailsSoftLock] No configuration block provided in `configure`"
+      end
+    end
+
+    # Returns the current configuration instance.
+    # @return [Configuration] The configuration object.
+    def configuration
+      @configuration ||= Configuration.new
+    end
+
+    # Resets the configuration (useful for testing).
+    # @return [void]
+    def reset_configuration
+      @configuration = nil
+    end
+  end
+
   # Load rake task if Rails
   require "rails_soft_lock/railtie" if defined?(Rails)
 end
+
+loader = Zeitwerk::Loader.for_gem
+loader.setup

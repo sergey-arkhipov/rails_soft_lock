@@ -33,30 +33,4 @@ module RailsSoftLock
       @adapter = value
     end
   end
-
-  class << self
-    # Configures the RailsSoftLock gem with a block.
-    # @yield [config] Yields the configuration object to the block.
-    # @return [void]
-    def configure
-      @configuration ||= Configuration.new
-      if block_given?
-        yield(@configuration)
-      else
-        warn "[RailsSoftLock] No configuration block provided in `configure`"
-      end
-    end
-
-    # Returns the current configuration instance.
-    # @return [Configuration] The configuration object.
-    def configuration
-      @configuration ||= Configuration.new
-    end
-
-    # Resets the configuration (useful for testing).
-    # @return [void]
-    def reset_configuration
-      @configuration = nil
-    end
-  end
 end
