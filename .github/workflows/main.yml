@@ -51,6 +51,7 @@ jobs:
   publish:
     needs: test
     runs-on: ubuntu-latest
+    environment: production
     if: github.event_name == 'release' && github.event.action == 'published'
     permissions:
       id-token: write # Required for OIDC
