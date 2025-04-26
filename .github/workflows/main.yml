@@ -5,6 +5,8 @@ on:
     branches:
       - master
   pull_request:
+  release:
+    types: [published] # Trigger on manual GitHub releases
 
 jobs:
   test:
@@ -43,3 +45,50 @@ jobs:
         run: bundle exec rspec
       - name: Run RuboCop
         run: bundle exec rubocop
+
+  # Publish gem when release
+  publish:
+    needs: test
+    runs-on: ubuntu-latest
+    if: github.event_name == 'release' && github.event.action == 'published'
+    permissions:
+      id-token: write # Required for OIDC
+      contents: write # Needed for checkout
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
+          fetch-depth: 0
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: .ruby-version
+          bundler-cache: true
+
+      - name: Verify version match
+        run: |
+          # Extract version from tag (works for both push and release triggers)
+          if [[ "${{ github.event_name }}" == "release" ]]; then
+            TAG_VERSION="${{ github.event.release.tag_name }}"
+          else
+            TAG_VERSION="${GITHUB_REF#refs/tags/v}"
+          fi
+          TAG_VERSION="${TAG_VERSION#v}"  # Remove 'v' prefix if present
+          GEM_VERSION=$(ruby -r ./lib/rails_soft_lock/version.rb -e "puts RailsSoftLock::VERSION")
+
+          echo "::group::Version Verification"
+          echo "Tag Version: $TAG_VERSION"
+          echo "Gem Version: $GEM_VERSION"
+          echo "::endgroup::"
+
+          if [ "$TAG_VERSION" != "$GEM_VERSION" ]; then
+            echo "::error::Version mismatch! Tag ($TAG_VERSION) ≠ Gem ($GEM_VERSION)"
+            exit 1
+          fi
+
+      - name: Publish via Trusted Publishing
+        uses: rubygems/release-gem@v1
+        with:
+          gemspec-dir: "."
