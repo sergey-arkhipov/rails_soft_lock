@@ -29,9 +29,13 @@ module RailsSoftLock
     # Checks if Rails environment is available and properly configured
     # @return [Boolean]
     def rails_available?
-      defined?(Rails) &&
-        Rails.respond_to?(:application) &&
-        Rails.application
+      if defined?(Rails) &&
+         Rails.respond_to?(:application) &&
+         Rails.application
+        true
+      else
+        false
+      end
     end
 
     # Attempts to load Redis config from Rails application
