@@ -6,22 +6,10 @@ module RailsSoftLock
   # Определяет настройки блокировки модели
   module ModelExtensions
     extend ActiveSupport::Concern
-
     class_methods do
-      def acts_as_locked_by(attribute = :none)
-        RailsSoftLock.configuration[:acts_as_locked_by] = attribute
-      end
-
-      def current_locked_attribute
-        RailsSoftLock.configuration[:acts_as_locked_by]
-      end
-
-      def acts_as_locked_scope(attribute = nil)
-        RailsSoftLock.configuration[:acts_as_locked_scope] = attribute || -> { "default" }
-      end
-
-      def current_locked_scope
-        RailsSoftLock.configuration[:acts_as_locked_scope]
+      # :reek:UtilityFunction
+      def acts_as_locked_by(attribute = :lock_attribute, scope: -> { "none" })
+        RailsSoftLock.configuration.acts_as_locked_by(attribute, scope: scope)
       end
 
       def all_locks
@@ -33,8 +21,8 @@ module RailsSoftLock
       end
 
       def object_name
-        scope = current_locked_scope&.call || "default"
-        "#{name}-#{scope}"
+        scope = RailsSoftLock.configuration.acts_as_locked_scope
+        "#{name}::#{scope}"
       end
     end
 
@@ -59,7 +47,7 @@ module RailsSoftLock
       end
 
       def object_key
-        attribute = RailsSoftLock.configuration[:acts_as_locked_by]
+        attribute = RailsSoftLock.configuration.acts_as_locked_attribute
         raise ArgumentError, "No locked attribute defined" if attribute == :none
 
         send(attribute)

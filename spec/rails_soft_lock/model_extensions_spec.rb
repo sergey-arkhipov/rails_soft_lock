@@ -20,7 +20,7 @@ end
 RSpec.describe RailsSoftLock::ModelExtensions do
   let(:user) { User.create! }
   let(:test_model) { TestModel.create!(lock_attribute: "test_key") }
-  let(:object_name) { "TestModel-default" }
+  let(:object_name) { "TestModel::none" }
   let(:object_key) { "test_key" }
   let(:object_value) { user.id.to_s }
 
@@ -52,45 +52,31 @@ RSpec.describe RailsSoftLock::ModelExtensions do
   describe ".acts_as_locked_by" do
     it "sets the locked attribute in configuration" do
       TestModel.acts_as_locked_by(:lock_attribute)
-      expect(TestModel.current_locked_attribute).to eq(:lock_attribute)
-    end
-  end
-
-  describe ".current_locked_attribute" do
-    it "returns the configured locked attribute" do
-      expect(TestModel.current_locked_attribute).to eq(:lock_attribute)
+      expect(RailsSoftLock.configuration.acts_as_locked_attribute).to eq(:lock_attribute)
     end
   end
 
   describe ".acts_as_locked_scope" do
     it "sets the locked scope in configuration" do
       scope = -> { "custom_scope" }
-      TestModel.acts_as_locked_scope(scope)
-      expect(TestModel.current_locked_scope).to eq(scope)
+      TestModel.acts_as_locked_by(scope:)
+      expect(RailsSoftLock.configuration.acts_as_locked_scope).to eq(scope.call)
     end
 
     it "sets default scope if no argument provided" do
-      TestModel.acts_as_locked_scope
-      expect(TestModel.current_locked_scope.call).to eq("default")
-    end
-  end
-
-  describe ".current_locked_scope" do
-    it "returns the configured locked scope" do
-      scope = -> { "custom_scope" }
-      TestModel.acts_as_locked_scope(scope)
-      expect(TestModel.current_locked_scope.call).to eq("custom_scope")
+      TestModel.acts_as_locked_by
+      expect(RailsSoftLock.configuration.acts_as_locked_scope).to eq("none")
     end
   end
 
   describe ".object_name" do
     it "returns the model name with default scope" do
-      expect(TestModel.object_name).to eq("TestModel-default")
+      expect(TestModel.object_name).to eq("TestModel::none")
     end
 
     it "returns the model name with custom scope" do
-      TestModel.acts_as_locked_scope(-> { "custom" })
-      expect(TestModel.object_name).to eq("TestModel-custom")
+      TestModel.acts_as_locked_by(scope: -> { "custom" })
+      expect(TestModel.object_name).to eq("TestModel::custom")
     end
   end
 

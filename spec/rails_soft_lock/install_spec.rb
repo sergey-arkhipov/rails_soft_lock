@@ -70,8 +70,7 @@ RSpec.describe "RailsSoftLock Installation" do # # rubocop:disable RSpec/Describ
         RailsSoftLock.configure do |config|
           config.adapter = :redis
           config.adapter_options = { redis: { url: "redis://localhost:6379/0", timeout: 5 } }
-          config.acts_as_locked_by = :lock_attribute
-          config.acts_as_locked_scope = -> { "test_scope" }
+          config.locked_by_class = "User"
         end
       RUBY
 
@@ -83,12 +82,13 @@ RSpec.describe "RailsSoftLock Installation" do # # rubocop:disable RSpec/Describ
       config = RailsSoftLock.configuration
       expect(config.adapter).to eq(:redis)
       expect(config.adapter_options).to eq(redis: { url: "redis://localhost:6379/0", timeout: 5 })
-      expect(config.acts_as_locked_by).to eq(:lock_attribute)
-      expect(config.acts_as_locked_scope.call).to eq("test_scope")
+      expect(config.acts_as_locked_attribute).to eq(:lock_attribute)
+      expect(config.acts_as_locked_scope).to eq("none")
     end
   end
 
-  # Вспомогательный метод для захвата вывода
+  # Helper method for catch output
+  # :reek:UtilityFunction
   def capture_output
     original_stdout = $stdout
     $stdout = StringIO.new
