@@ -9,9 +9,7 @@ RSpec.describe RailsSoftLock::RedisConfig do
     it "returns default redis configuration hash" do
       expect(described_class.default_adapter_options).to eq(
         redis: {
-          host: "localhost",
-          port: 6379,
-          db: 0,
+          url: "redis://localhost:6379/0",
           timeout: 5
         }
       )
@@ -22,9 +20,7 @@ RSpec.describe RailsSoftLock::RedisConfig do
     it "returns default configuration when no Rails" do
       hide_const("Rails")
       expect(described_class.config_with_defaults).to eq(
-        host: "localhost",
-        port: 6379,
-        db: 0,
+        url: "redis://localhost:6379/0",
         timeout: 5
       )
     end
@@ -40,7 +36,7 @@ RSpec.describe RailsSoftLock::RedisConfig do
 
       it "returns defaults when config_for unavailable" do
         allow(rails_app).to receive(:respond_to?).with(:config_for).and_return(false)
-        expect(described_class.config_with_defaults).to include(port: 6379)
+        expect(described_class.config_with_defaults).to include(url: "redis://localhost:6379/0")
       end
 
       context "when redis config is available" do # rubocop:disable RSpec/NestedGroups
@@ -57,10 +53,6 @@ RSpec.describe RailsSoftLock::RedisConfig do
 
         it "uses custom port" do
           expect(described_class.config_with_defaults[:port]).to eq(6380)
-        end
-
-        it "preserves default db" do
-          expect(described_class.config_with_defaults[:db]).to eq(0)
         end
       end
     end
