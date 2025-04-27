@@ -14,7 +14,7 @@ module RailsSoftLock
 
     def initialize
       @adapter = :redis # Default adapter
-      @adapter_options = adapter_options || {} # Default adapter options
+      @adapter_options ||= RedisConfig.default_adapter_options # Default adapter options
       @locked_by_class = locked_by_class || "User"
     end
 
