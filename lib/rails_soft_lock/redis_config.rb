@@ -45,6 +45,7 @@ module RailsSoftLock
       return {} unless rails_config_available?
 
       config = Rails.application.config_for(:redis)
+
       config.is_a?(Hash) ? config.symbolize_keys : {}
     rescue RuntimeError, ArgumentError
       {}
@@ -61,7 +62,7 @@ module RailsSoftLock
     # @return [Hash]
     # @api private
     def default_settings
-      { host: "localhost", port: 6379, db: 0, timeout: 5 }
+      { url: "redis://localhost:6379/0", timeout: 5 }
     end
   end
 end
