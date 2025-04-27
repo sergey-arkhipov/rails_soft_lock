@@ -1,8 +1,13 @@
 # RailsSoftLock
 
-This gem implements the ability to lock Rails Active Records using adapters for in-memory databases, such as redis, nats, etc.
+The gem allows you to implement group locking of records with the same attribute.
+Instead of locking each record in the database, one record for the attribute is created in the in-memory database and checked on access, which avoids complex and expensive database-level locks.
+
+Gem implements the ability to lock Rails Active Records using adapters for in-memory databases, such as redis, nats, etc.
 Locks can be done by using the active record attribute.
-it is possible to define the uniqueness scope of the attribute.
+
+It is possible to define the uniqueness scope of the attribute.
+
 The gem is under active development.
 Currently, an adapter to redis-compatible databases, such as redis, walkey, etc., has been implemented.
 

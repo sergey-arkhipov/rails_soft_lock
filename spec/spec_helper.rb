@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 require "rails_soft_lock"
-require "rails_soft_lock/configuration"
 require "support/rails_soft_lock"
 require "redis"
 require "bundler/setup"
@@ -15,14 +14,14 @@ RSpec.configure do |config|
 
   # Disable RSpec exposing methods globally on `Module` and `main`
   config.disable_monkey_patching!
-  config.example_status_persistence_file_path = "spec/examples.txt"
+  # config.example_status_persistence_file_path = "spec/examples.txt"
   config.default_formatter = "doc" if config.files_to_run.one?
 
   config.expect_with :rspec do |c|
     c.syntax = :expect
   end
 
-  # Загружаем задачи Rake
+  # Load Rake task
   config.before(:suite) do
     Rake::Task.define_task(:environment)
     load File.expand_path("../lib/tasks/rails_soft_lock.rake", __dir__)
