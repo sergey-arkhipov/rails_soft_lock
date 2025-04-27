@@ -9,7 +9,6 @@ module RailsSoftLock
     attr_reader :adapter
     # :reek:Attribute
     attr_accessor :adapter_options
-
     # :reek:Attribute
     attr_writer :locked_by_class
 

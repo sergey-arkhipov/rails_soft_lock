@@ -22,7 +22,7 @@ namespace :rails_soft_lock do
 
         # configuration for the redis adapter
         config.adapter_options = {
-          redis: rails.application.config_for(:redis).merge(
+          redis: Rails.application.config_for(:redis).merge(
             timeout: 5
           )
         }
