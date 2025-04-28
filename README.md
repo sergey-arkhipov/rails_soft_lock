@@ -1,31 +1,49 @@
-# RailsSoftLock - mark and operate with group of ApplicationRecord by attribute
+# RailsSoftLock – Group Locking for ApplicationRecord by Attribute
 
-The gem was originally designed to implement group locking of records with the same attribute.
-Instead of locking each record in the database, a single record for the attribute is created in the in-memory database and checked on access, which avoids complex and expensive locking at the database level.
+## Overview
 
-The gem implements the Rails Active Records locking capability using adapters for in-memory databases such as redis, nats, etc.
-Locks can be performed using the active record attribute.
+The RailsSoftLock gem provides group-level locking for Rails ApplicationRecord objects based on a shared attribute. Instead of individually locking each database record (which can be expensive and complex), it creates and manages a single in-memory lock for the entire group via the attribute. This reduces database contention while maintaining thread safety.
 
-It is possible to define the uniqueness scope of the attribute.
+### Key Features
 
-However, the gem can be used in general to mark records with the same attribute within the uniqueness scope of the attribute and use methods similar to locks to perform the necessary checks/sets.
+    Lightweight Group Locking:
 
-In particular, this can be used to mark necessary groups of records and use this information later.
-An example would be to set the favorite flag for a group of records with the same attribute.
+        Locks records sharing the same attribute value via an in-memory database (e.g., Redis, NATS).
 
-The gem is under active development.
-Currently, an adapter to redis-compatible databases, such as redis, walkey, etc., has been implemented.
+        Avoids expensive row-level locks in your primary database.
+
+    ActiveRecord Integration:
+
+        Extends Rails’ built-in locking mechanisms with adapters for in-memory stores.
+
+        Supports scoped uniqueness (e.g., lock groups by account_id + category).
+
+    Beyond Locking:
+
+        Can also mark/tag groups of records (e.g., flag all records with project_id=123 as "favorites").
+
+        Useful for batch operations or state management (e.g., "processing", "archived").
+
+### Current Status
+
+    Active Development: New features and optimizations in progress.
+
+    Available Adapters: Redis and Redis-compatible databases (e.g., Walkey).
 
 ## Installation
 
 Install the gem and add to the application's Gemfile:
 
 ```bash
+# Stable version
+gem "rails_soft_lock"
+# Last version
 gem "rails_soft_lock", git: "https://github.com/sergey-arkhipov/rails_soft_lock.git"
 
 ```
 
-After run
+When using Redis as an adapter and having REDIS_URL in config/redis.yml it is not necessary to install the initializer.
+Only when need to replace some standard settings, User model, for example, or adapter.
 
 ```bash
 bundle install
@@ -87,26 +105,42 @@ and `acts_as_locked_by` with `acts_as_locked_scope` should be set, for example
 class Article < ApplicationRecord
   include RailsSoftLock::ModelExtensions
 
-  acts_as_locked_by(:attribyte)
-  acts_as_locked_scope(proc { :scoped_attribute || "none" })
+  acts_as_locked_by: attribyte, scope: -> { 'scope_result'}
+
 
 ```
 
 See `spec/rails_soft_lock/model_extensions_spec.rb for implemented methods`
 
-### Attention
+### Understanding the lock_or_find Method
 
-Pay attention how method `locak_or_find` work
+The lock_or_find method returns a hash with the following structure:
+ruby
 
-Method return hash
-`has_locked: false, locked_by: user.id`
+{ has_locked: false, locked_by: user.id }
 
-`has_lock`: false implies that there was no lock on the passed object before this point.
-Not to be confused with the result of executing the lock itself.
-Since this is an in-memory base and the goal is quick and easy access, the method sets the lock,
-reports that there was no lock before, and returns the user of the lock.
-If there was a lock, true is returned and the user of this current lock.
-The lock itself is not changed.
+Key Points:
+
+    has_locked: false indicates that the object was not locked prior to this operation.
+
+        Note: This does not refer to the success/failure of the lock attempt itself.
+
+    How locking works:
+
+        Since this is an in-memory database designed for fast access, the method:
+
+            Sets the lock (if no lock existed).
+
+            Reports (has_locked: false) that no prior lock was present.
+
+            Returns the ID of the user who now holds the lock.
+
+        If the object was already locked, it returns:
+        ruby
+
+{ has_locked: true, locked_by: <existing_lock_user_id> }
+
+In this case, the lock remains unchanged (no new lock is set).
 
 ## Development
 
