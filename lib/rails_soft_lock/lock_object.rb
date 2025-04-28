@@ -9,7 +9,7 @@ module RailsSoftLock
   #   - object_key: The identifier of the lock instance, typically a unique database record ID
   #   - object_value: The identifier of the locker that locked the record
   class LockObject
-    # Подключаем адаптер на основе конфигурации
+    # Attach adapter based on config
     def self.adapter
       case RailsSoftLock.configuration.adapter
       when :redis
