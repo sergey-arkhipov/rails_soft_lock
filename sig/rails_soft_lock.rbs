@@ -2,6 +2,8 @@
 module RailsSoftLock
   self.@lock_manager: untyped
 
+  self.@configuration: untyped
+
   # Error class for gem
   class Error < StandardError
   end
@@ -14,4 +16,17 @@ module RailsSoftLock
   def self.create: (untyped object_name, untyped object_key, untyped object_value) -> untyped
 
   def self.update: (untyped object_name, untyped object_key, untyped object_value) -> untyped
+
+  # Configures the RailsSoftLock gem with a block.
+  # @yield [config] Yields the configuration object to the block.
+  # @return [void]
+  def self.configure: () ?{ (untyped) -> untyped } -> untyped
+
+  # Returns the current configuration instance.
+  # @return [Configuration] The configuration object.
+  def self.configuration: () -> untyped
+
+  # Resets the configuration (useful for testing).
+  # @return [void]
+  def self.reset_configuration: () -> untyped
 end

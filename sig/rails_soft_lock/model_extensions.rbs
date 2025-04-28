@@ -1,6 +1,0 @@
-module RailsSoftLock
-  # Определяет настройки блокировки модели
-  module ModelExtensions
-    extend ActiveSupport::Concern
-  end
-end

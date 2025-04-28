@@ -5,7 +5,7 @@
 require "spec_helper"
 require "rails_soft_lock/redis_adapter"
 
-# Тестовый класс для включения RedisAdapter
+# Test class for RedisAdapter
 class RedisAdapterTest
   include RailsSoftLock::RedisAdapter
 

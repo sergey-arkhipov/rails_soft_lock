@@ -6,7 +6,7 @@ Gem::Specification.new do |spec|
   spec.name = "rails_soft_lock"
   spec.version = RailsSoftLock::VERSION
   spec.authors = ["Sergey Arkhipov", "Vladimir Peskov"]
-  spec.email = ["sergey-ARkhipov@ya.ru"]
+  spec.email = ["sergey-arkhipov@ya.ru", "v.peskov@mail.ru"]
 
   spec.summary = "Lock Active record by attribyte using in-memory adapters"
   spec.description = "Using In-Memory Databases to Work with Rails Active Record Locks"

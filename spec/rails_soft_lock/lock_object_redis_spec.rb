@@ -47,7 +47,7 @@ RSpec.describe RailsSoftLock::LockObject, adapter: :redis do
 
   describe "#redis_client" do
     it "creates a ConnectionPool::Wrapper with default options when no redis config is provided" do # rubocop:disable RSpec/ExampleLength
-      # Очищаем конфигурацию redis
+      # Clear Redis configuration
       RailsSoftLock.configure do |config|
         config.adapter = :redis
         config.adapter_options = {}
