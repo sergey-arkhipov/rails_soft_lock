@@ -28,7 +28,7 @@ The RailsSoftLock gem provides group-level locking for Rails ApplicationRecord o
 
     Active Development: New features and optimizations in progress.
 
-    Available Adapters: Redis and Redis-compatible databases (e.g., Walkey).
+    Available Adapters: Redis and Redis-compatible databases (e.g., Valkey).
 
 ## Installation
 
