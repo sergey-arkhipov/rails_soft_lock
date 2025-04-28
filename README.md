@@ -1,12 +1,17 @@
-# RailsSoftLock
+# RailsSoftLock - mark and operate with group of ApplicationRecord by attribute
 
-The gem allows you to implement group locking of records with the same attribute.
-Instead of locking each record in the database, one record for the attribute is created in the in-memory database and checked on access, which avoids complex and expensive database-level locks.
+The gem was originally designed to implement group locking of records with the same attribute.
+Instead of locking each record in the database, a single record for the attribute is created in the in-memory database and checked on access, which avoids complex and expensive locking at the database level.
 
-Gem implements the ability to lock Rails Active Records using adapters for in-memory databases, such as redis, nats, etc.
-Locks can be done by using the active record attribute.
+The gem implements the Rails Active Records locking capability using adapters for in-memory databases such as redis, nats, etc.
+Locks can be performed using the active record attribute.
 
 It is possible to define the uniqueness scope of the attribute.
+
+However, the gem can be used in general to mark records with the same attribute within the uniqueness scope of the attribute and use methods similar to locks to perform the necessary checks/sets.
+
+In particular, this can be used to mark necessary groups of records and use this information later.
+An example would be to set the favorite flag for a group of records with the same attribute.
 
 The gem is under active development.
 Currently, an adapter to redis-compatible databases, such as redis, walkey, etc., has been implemented.
