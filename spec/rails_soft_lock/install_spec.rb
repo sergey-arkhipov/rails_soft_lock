@@ -7,7 +7,7 @@ require "rails_soft_lock"
 require "fileutils"
 require "tmpdir"
 
-# Мокаем Rails для тестов
+# Mock Rails
 module Rails
   def self.root
     Pathname.new(Dir.tmpdir)
@@ -19,20 +19,20 @@ RSpec.describe "RailsSoftLock Installation" do # # rubocop:disable RSpec/Describ
   let(:config_dir) { File.dirname(initializer_path) }
 
   before do
-    # Создаём временную папку для тестов
+    # Create temp folder
     FileUtils.mkdir_p(config_dir)
-    # Очищаем задачи Rake перед каждым тестом
+    # Clear Rake task before each test
     Rake::Task.clear
-    # Перезагружаем задачу, чтобы избежать кэширования
+    # Reload task prevent store in cache
     load File.expand_path("../../lib/tasks/rails_soft_lock.rake", __dir__)
-    # Сбрасываем конфигурацию перед каждым тестом
+    # Reset gem configuration before each test
     RailsSoftLock.send(:reset_configuration)
   end
 
   after do
-    # Очищаем временные файлы
+    # Clear temp dir
     FileUtils.rm_rf(config_dir)
-    # Сбрасываем конфигурацию после каждого теста
+    # Reset gem configuration after each test
     RailsSoftLock.send(:reset_configuration)
   end
 
@@ -65,7 +65,7 @@ RSpec.describe "RailsSoftLock Installation" do # # rubocop:disable RSpec/Describ
 
   describe "configuration loading" do
     it "applies configuration from initializer", :aggregate_failures do # rubocop:disable RSpec/ExampleLength
-      # Подготовка конфигурации
+      # Prepare configuration
       config_content = <<~RUBY
         RailsSoftLock.configure do |config|
           config.adapter = :redis
@@ -74,11 +74,11 @@ RSpec.describe "RailsSoftLock Installation" do # # rubocop:disable RSpec/Describ
         end
       RUBY
 
-      # Записываем и загружаем конфигурацию
+      # Save and load confifuration
       File.write(initializer_path, config_content)
       load initializer_path
 
-      # Проверки конфигурации
+      # Check confifuration
       config = RailsSoftLock.configuration
       expect(config.adapter).to eq(:redis)
       expect(config.adapter_options).to eq(redis: { url: "redis://localhost:6379/0", timeout: 5 })

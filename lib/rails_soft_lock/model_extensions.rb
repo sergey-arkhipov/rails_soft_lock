@@ -3,7 +3,7 @@
 # lib/rails_soft_lock/model_extensions.rb
 
 module RailsSoftLock
-  # Определяет настройки блокировки модели
+  # Extend model and give methods from gem
   module ModelExtensions
     extend ActiveSupport::Concern
     class_methods do

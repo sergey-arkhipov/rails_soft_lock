@@ -6,7 +6,7 @@ RSpec.describe RailsSoftLock do
   let(:object_value) { "locker1" }
 
   before do
-    # Настраиваем конфигурацию для Redis
+    # Setup Redis configuration
     described_class.configure do |config|
       config.adapter = :redis
       config.adapter_options = {
@@ -16,13 +16,13 @@ RSpec.describe RailsSoftLock do
         }
       }
     end
-    # Очищаем Redis перед каждым тестом
+    # Clear Redis before each test
     redis = Redis.new(url: ENV["REDIS_URL"] || "redis://localhost:6379/0")
     redis.del(object_name)
   end
 
   after do
-    # Сбрасываем конфигурацию и lock_manager после каждого теста
+    # Reset configuration  and lock_manager after each test
     described_class.send(:reset_configuration)
     described_class.instance_variable_set(:@lock_manager, nil)
   end
