@@ -54,18 +54,20 @@ RSpec.describe RailsSoftLock::ModelExtensions do
       expect(TestModel.locked_attribute).to eq(:custom_attr)
     end
 
-    it "keeps default locked attribute if none provided" do
-      TestModel.acts_as_locked_by
-      expect(TestModel.locked_attribute).to eq(:lock_attribute)
+    it "raises an error if attribute is not provided" do
+      expect { TestModel.acts_as_locked_by }.to raise_error(
+        RailsSoftLock::InvalidArgumentError,
+        "[RailsSoftLock.acts_as_locked_by] Argument 'attribute' is required"
+      )
     end
 
     it "sets locked scope if provided" do
-      TestModel.acts_as_locked_by(nil, scope: -> { "custom_scope" })
+      TestModel.acts_as_locked_by(:attribute, scope: -> { "custom_scope" })
       expect(TestModel.lock_scope_proc.call).to eq("custom_scope")
     end
 
     it "keeps default locked scope if none provided" do
-      TestModel.acts_as_locked_by
+      TestModel.acts_as_locked_by :attribute
       expect(TestModel.lock_scope_proc.call).to eq("none")
     end
   end
@@ -76,7 +78,7 @@ RSpec.describe RailsSoftLock::ModelExtensions do
     end
 
     it "returns correct object name with custom scope" do
-      TestModel.acts_as_locked_by(nil, scope: -> { "custom" })
+      TestModel.acts_as_locked_by(:attribute, scope: -> { "custom" })
       expect(TestModel.object_name).to eq("TestModel::custom")
     end
   end
@@ -108,7 +110,10 @@ RSpec.describe RailsSoftLock::ModelExtensions do
 
     it "raises an error if no locked attribute is defined" do
       TestModel.acts_as_locked_by(:none)
-      expect { test_model.object_key }.to raise_error(ArgumentError, "No locked attribute defined")
+      expect do
+        test_model.object_key
+      end.to raise_error(RailsSoftLock::NoMethodError,
+                         "[RailsSoftLock.object_key] Model TestModel not respond to :none")
     end
   end
 
