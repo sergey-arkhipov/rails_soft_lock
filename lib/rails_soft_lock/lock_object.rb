@@ -9,17 +9,20 @@ module RailsSoftLock
   #   - object_key: The identifier of the lock instance, typically a unique database record ID
   #   - object_value: The identifier of the locker that locked the record
   class LockObject
-    # Attach adapter based on config
+    # Maps adapter symbols to their respective modules
+    ADAPTER_MAP = {
+      redis: RailsSoftLock::RedisAdapter
+      # nats: RailsSoftLock::NatsAdapter,
+      # memcached: RailsSoftLock::MemcachedAdapter
+    }.freeze
+
+    # Selects and returns the adapter module based on current configuration.
+    #
+    # @return [Module] adapter module (e.g., RedisAdapter)
+    # @raise [ArgumentError] if adapter is not recognized
     def self.adapter
-      case RailsSoftLock.configuration.adapter
-      when :redis
-        RailsSoftLock::RedisAdapter
-      when :nats
-        RailsSoftLock::NatsAdapter
-      when :memcached
-        RailsSoftLock::MemcachedAdapter
-      else
-        raise ArgumentError, "Unknown adapter: #{RailsSoftLock.configuration.adapter}"
+      ADAPTER_MAP.fetch(RailsSoftLock.configuration.adapter) do |key|
+        raise ArgumentError, "Unknown adapter: #{key}"
       end
     end
 

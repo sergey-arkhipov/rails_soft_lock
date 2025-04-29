@@ -13,6 +13,7 @@ module RailsSoftLock
     # :reek:Attribute
     attr_writer :locked_by_class
 
+    # Initializes configuration with default values.
     def initialize
       @adapter = :redis
       @adapter_options ||= RedisConfig.default_adapter_options
@@ -26,10 +27,10 @@ module RailsSoftLock
       @locked_by_class.is_a?(String) ? @locked_by_class.constantize : @locked_by_class
     end
 
-    # Sets the adapter for lock storage.
+    # Sets the adapter (e.g., :redis, :nats, :memcached).
     #
     # @param value [Symbol] one of the VALID_ADAPTERS
-    # @raise [ArgumentError] if adapter is invalid
+    # @raise [ArgumentError] if adapter is not valid
     # @return [void]
     def adapter=(value)
       raise ArgumentError, "Adapter must be one of: #{VALID_ADAPTERS.join(", ")}" unless VALID_ADAPTERS.include?(value)
