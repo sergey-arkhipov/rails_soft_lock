@@ -82,8 +82,7 @@ RSpec.describe "RailsSoftLock Installation" do # # rubocop:disable RSpec/Describ
       config = RailsSoftLock.configuration
       expect(config.adapter).to eq(:redis)
       expect(config.adapter_options).to eq(redis: { url: "redis://localhost:6379/0", timeout: 5 })
-      expect(config.acts_as_locked_attribute).to eq(:lock_attribute)
-      expect(config.acts_as_locked_scope).to eq("none")
+      expect(config.locked_by_class).to eq(User)
     end
   end
 

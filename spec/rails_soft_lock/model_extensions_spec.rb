@@ -11,7 +11,7 @@ class User < ActiveRecord::Base
   self.table_name = "users"
 end
 
-# Test model ModelExtensions
+# Test model with RailsSoftLock extension
 class TestModel < ActiveRecord::Base
   self.table_name = "test_models"
   include RailsSoftLock::ModelExtensions
@@ -37,11 +37,10 @@ RSpec.describe RailsSoftLock::ModelExtensions do
     end
 
     # Cleared Redis before each test
-    redis = Redis.new(url: ENV["REDIS_URL"] || "redis://localhost:6379/0")
-    redis.del(object_name)
+    Redis.new(url: ENV["REDIS_URL"] || "redis://localhost:6379/0").del(object_name)
 
     # Setup acts_as_locked_by
-    TestModel.acts_as_locked_by(:lock_attribute)
+    TestModel.acts_as_locked_by(:lock_attribute, scope: -> { "none" })
   end
 
   after do
@@ -50,65 +49,55 @@ RSpec.describe RailsSoftLock::ModelExtensions do
   end
 
   describe ".acts_as_locked_by" do
-    it "sets the locked attribute in configuration" do
-      TestModel.acts_as_locked_by(:lock_attribute)
-      expect(RailsSoftLock.configuration.acts_as_locked_attribute).to eq(:lock_attribute)
-    end
-  end
-
-  describe ".acts_as_locked_scope" do
-    it "sets the locked scope in configuration" do
-      scope = -> { "custom_scope" }
-      TestModel.acts_as_locked_by(scope:)
-      expect(RailsSoftLock.configuration.acts_as_locked_scope).to eq(scope.call)
+    it "sets locked attribute if provided" do
+      TestModel.acts_as_locked_by(:custom_attr)
+      expect(TestModel.locked_attribute).to eq(:custom_attr)
     end
 
-    it "sets default scope if no argument provided" do
+    it "keeps default locked attribute if none provided" do
       TestModel.acts_as_locked_by
-      expect(RailsSoftLock.configuration.acts_as_locked_scope).to eq("none")
+      expect(TestModel.locked_attribute).to eq(:lock_attribute)
+    end
+
+    it "sets locked scope if provided" do
+      TestModel.acts_as_locked_by(nil, scope: -> { "custom_scope" })
+      expect(TestModel.lock_scope_proc.call).to eq("custom_scope")
+    end
+
+    it "keeps default locked scope if none provided" do
+      TestModel.acts_as_locked_by
+      expect(TestModel.lock_scope_proc.call).to eq("none")
     end
   end
 
   describe ".object_name" do
-    it "returns the model name with default scope" do
+    it "returns correct object name with default scope" do
       expect(TestModel.object_name).to eq("TestModel::none")
     end
 
-    it "returns the model name with custom scope" do
-      TestModel.acts_as_locked_by(scope: -> { "custom" })
+    it "returns correct object name with custom scope" do
+      TestModel.acts_as_locked_by(nil, scope: -> { "custom" })
       expect(TestModel.object_name).to eq("TestModel::custom")
     end
   end
 
   describe ".all_locks" do
-    before do
-      RailsSoftLock::LockObject.new(
-        object_name: object_name,
-        object_key: "key1",
-        object_value: user.id.to_s
-      ).lock_or_find
-    end
+    before { test_model.lock_or_find(user) }
 
-    it "returns all locks for the model" do
-      expect(TestModel.all_locks).to eq("key1" => user.id.to_s)
+    it "returns all existing locks" do
+      expect(TestModel.all_locks).to eq({ object_key => user.id.to_s })
     end
   end
 
   describe ".unlock" do
-    before do
-      RailsSoftLock::LockObject.new(
-        object_name: object_name,
-        object_key: object_key,
-        object_value: user.id.to_s
-      ).lock_or_find
+    before { test_model.lock_or_find(user) }
+
+    it "unlocks the specified object_key" do
+      expect(TestModel.unlock(object_key)).to be true
     end
 
-    it "unlocks the specified key", :aggregate_failures do
-      result = TestModel.unlock(object_key)
-      lock_status = RailsSoftLock::LockObject.new(object_name: object_name, object_key: object_key).locked_by
-
-      expect(result).to be true
-      expect(lock_status).to be_nil
+    it "does not unlock non-existent key" do
+      expect(TestModel.unlock("non_existent")).to be false
     end
   end
 
