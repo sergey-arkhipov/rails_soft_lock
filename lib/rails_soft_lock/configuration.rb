@@ -42,14 +42,14 @@ module RailsSoftLock
     #
     # @return [Symbol]
     def acts_as_locked_attribute
-      @acts_as_locked_options&.[](:by) || :lock_attribute
+      @acts_as_locked_options&.[](:by)
     end
 
     # Returns the evaluated scope value, typically a tenant ID or similar.
     #
     # @return [Object] result of the scope lambda or "none"
     def acts_as_locked_scope
-      @acts_as_locked_options&.[](:scope)&.call || "none"
+      @acts_as_locked_options&.[](:scope)&.call
     end
 
     # Returns the class used to represent the locker (usually a User model).

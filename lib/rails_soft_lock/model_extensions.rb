@@ -8,7 +8,7 @@ module RailsSoftLock
     extend ActiveSupport::Concern
     class_methods do
       # :reek:UtilityFunction
-      def acts_as_locked_by(attribute = :lock_attribute, scope: -> { "none" })
+      def acts_as_locked_by(attribute = nil, scope: nil)
         RailsSoftLock.configuration.acts_as_locked_by(attribute, scope: scope)
       end
 
