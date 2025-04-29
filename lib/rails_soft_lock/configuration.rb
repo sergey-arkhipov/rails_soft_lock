@@ -5,7 +5,10 @@ module RailsSoftLock
   # Configuration class for RailsSoftLock gem.
   class Configuration
     # List of supported adapters.
-    VALID_ADAPTERS = %i[redis nats memcached].freeze
+    VALID_ADAPTERS          = %i[redis nats memcached].freeze
+    DEFAULT_LOCKED_BY_CLASS = "User"
+    DEFAULT_LOCKED_OPTIONS  = { by: :lock_attribute, scope: -> { "none" } }.freeze
+
     attr_reader :adapter
     # :reek:Attribute
     attr_accessor :adapter_options
@@ -13,13 +16,14 @@ module RailsSoftLock
     attr_writer :locked_by_class
 
     def initialize
-      @adapter = :redis # Default adapter
-      @adapter_options ||= RedisConfig.default_adapter_options # Default adapter options
-      @locked_by_class = locked_by_class || "User"
+      @adapter                = :redis # Default adapter
+      @adapter_options      ||= RedisConfig.default_adapter_options # Default adapter options
+      @locked_by_class        = DEFAULT_LOCKED_BY_CLASS
+      @acts_as_locked_options = DEFAULT_LOCKED_OPTIONS.dup
     end
 
     def acts_as_locked_by(attribute = :lock_attribute, scope: -> { "none" })
-      @acts_as_locked_options = { by: attribute, scope: scope }
+      @acts_as_locked_options = DEFAULT_LOCKED_OPTIONS.merge(by: attribute, scope: scope)
     end
 
     def acts_as_locked_attribute
