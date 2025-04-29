@@ -30,8 +30,12 @@ module RailsSoftLock
     # @param attribute [Symbol] the attribute name to lock by (e.g., :id, :article_code)
     # @param scope [Proc] a lambda that returns a scoping key (e.g., tenant_id)
     # @return [void]
-    def acts_as_locked_by(attribute = :lock_attribute, scope: -> { "none" })
-      @acts_as_locked_options = DEFAULT_LOCKED_OPTIONS.merge(by: attribute, scope: scope)
+    def acts_as_locked_by(attribute: nil, scope: nil)
+      options = {}
+      options[:by] = attribute if attribute
+      options[:scope] = scope if scope
+
+      @acts_as_locked_options = DEFAULT_LOCKED_OPTIONS.merge(options)
     end
 
     # Returns the attribute used to identify lock ownership.
