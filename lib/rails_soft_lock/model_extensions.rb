@@ -20,7 +20,12 @@ module RailsSoftLock
       # @param scope [Proc] a proc returning the scoping value (default: -> { "none" })
       # @return [void]
       def acts_as_locked_by(attribute = nil, scope: nil)
-        self.locked_attribute = attribute if attribute
+        unless attribute
+          raise InvalidArgumentError,
+                "[RailsSoftLock.acts_as_locked_by] Argument 'attribute' is required"
+        end
+
+        self.locked_attribute = attribute
         self.lock_scope_proc  = scope if scope
       end
 
@@ -28,7 +33,7 @@ module RailsSoftLock
       #
       # @return [Hash]
       def all_locks
-        RailsSoftLock::LockObject.new(object_name: object_name).all_locks
+        LockObject.new(object_name: object_name).all_locks
       end
 
       # Unlocks a specific object key.
@@ -36,7 +41,7 @@ module RailsSoftLock
       # @param object_key [String, Integer]
       # @return [Boolean]
       def unlock(object_key)
-        RailsSoftLock::LockObject.new(object_name: object_name, object_key: object_key).unlock
+        LockObject.new(object_name: object_name, object_key: object_key).unlock
       end
 
       # Returns the composed object name (model + scope).
@@ -83,8 +88,10 @@ module RailsSoftLock
     # @return [Object]
     def object_key
       attribute = self.class.locked_attribute
-      raise ArgumentError, "No locked attribute defined" if attribute == :none
-
+      unless respond_to? attribute
+        raise NoMethodError,
+              "[RailsSoftLock.object_key] Model #{self.class} not respond to :#{attribute}"
+      end
       send(attribute)
     end
 

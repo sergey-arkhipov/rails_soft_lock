@@ -8,6 +8,10 @@ require "zeitwerk"
 module RailsSoftLock
   # Error class for gem
   class Error < StandardError; end
+  # Error class for Argument required error
+  class InvalidArgumentError < Error; end
+  # Error class for undef attribute for Model class
+  class NoMethodError < Error; end
 
   def self.lock_manager(object_name:, object_key: nil, object_value: nil)
     @lock_manager ||= LockObject.new(
