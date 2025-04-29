@@ -11,9 +11,9 @@ module RailsSoftLock
   class LockObject
     # Maps adapter symbols to their respective modules
     ADAPTER_MAP = {
-      redis: RailsSoftLock::RedisAdapter,
-      nats: RailsSoftLock::NatsAdapter,
-      memcached: RailsSoftLock::MemcachedAdapter
+      redis: RailsSoftLock::RedisAdapter
+      # nats: RailsSoftLock::NatsAdapter,
+      # memcached: RailsSoftLock::MemcachedAdapter
     }.freeze
 
     # Selects and returns the adapter module based on current configuration.
