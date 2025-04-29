@@ -35,13 +35,13 @@ RSpec.describe RailsSoftLock::RedisConfig do
       end
 
       it "returns defaults when config_for unavailable" do
-        allow(rails_app).to receive(:respond_to?).with(:config_for).and_return(false)
+        allow(rails_app).to receive(:config_for).and_return(false)
         expect(described_class.config_with_defaults).to include(url: "redis://localhost:6379/0")
       end
 
       context "when redis config is available" do # rubocop:disable RSpec/NestedGroups
         before do
-          allow(rails_app).to receive(:respond_to?).with(:config_for).and_return(true)
+          allow(rails_app).to receive(:config_for).and_return(true)
           allow(rails_app).to receive(:config_for)
             .with(:redis)
             .and_return("host" => "redis.test", "port" => 6380)

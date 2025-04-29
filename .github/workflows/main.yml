@@ -42,10 +42,12 @@ jobs:
           bundler-cache: true
       - name: Install dependencies
         run: bundle install
-      - name: Run tests
+      - name: Run rspec
         run: bundle exec rspec
-      - name: Run RuboCop
+      - name: Run rubocop
         run: bundle exec rubocop
+      - name: Run reek
+        run: bundle exec reek
 
   # Publish gem when release
   publish:

@@ -113,7 +113,7 @@ RSpec.describe RailsSoftLock::ModelExtensions do
       expect do
         test_model.object_key
       end.to raise_error(RailsSoftLock::NoMethodError,
-                         "[RailsSoftLock.object_key] Model TestModel not respond to :none")
+                         "[RailsSoftLock.object_key] Model TestModel does not respond to :none")
     end
   end
 

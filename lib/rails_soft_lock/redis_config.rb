@@ -29,13 +29,7 @@ module RailsSoftLock
     # Checks if Rails environment is available and properly configured
     # @return [Boolean]
     def rails_available?
-      if defined?(Rails) &&
-         Rails.respond_to?(:application) &&
-         Rails.application
-        true
-      else
-        false
-      end
+      !!(defined?(Rails) && Rails.try(:application).present?)
     end
 
     # Attempts to load Redis config from Rails application
@@ -55,7 +49,7 @@ module RailsSoftLock
     # @return [Boolean]
     # @api private
     def rails_config_available?
-      Rails.application.respond_to?(:config_for)
+      !!Rails.application.try(:config_for)
     end
 
     # The default Redis connection settings

@@ -37,5 +37,14 @@ module RailsSoftLock
 
       @adapter = value
     end
+
+    # Returns Redis configuration with defaults merged with adapter options.
+    #
+    # @return [Hash]
+    def redis_config
+      redis_config = adapter_options.fetch(:redis, {})
+      defaults = { url: "redis://localhost:6379/0", timeout: 5 }
+      defaults.merge(redis_config)
+    end
   end
 end

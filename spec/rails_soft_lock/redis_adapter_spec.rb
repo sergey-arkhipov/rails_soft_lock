@@ -9,6 +9,7 @@ require "rails_soft_lock/redis_adapter"
 class RedisAdapterTest
   include RailsSoftLock::RedisAdapter
 
+  # :reek:Attribute
   attr_accessor :object_name, :object_key, :object_value
 
   def initialize
