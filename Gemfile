@@ -17,6 +17,7 @@ group :development, :test do
   gem "rails"
   gem "rake"
   gem "redis"
+  gem "reek"
   gem "rspec"
   gem "rspec-rails"
   gem "rubocop"

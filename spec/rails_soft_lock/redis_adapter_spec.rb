@@ -9,6 +9,7 @@ require "rails_soft_lock/redis_adapter"
 class RedisAdapterTest
   include RailsSoftLock::RedisAdapter
 
+  # :reek:Attribute
   attr_accessor :object_name, :object_key, :object_value
 
   def initialize
@@ -61,7 +62,7 @@ RSpec.describe RailsSoftLock::RedisAdapter do
       it "uses default options if configuration is empty" do
         RailsSoftLock.configure do |config|
           config.adapter = :redis
-          config.adapter_options = { redis: {} }
+          config.adapter_options = {}
         end
 
         adapter.redis_client

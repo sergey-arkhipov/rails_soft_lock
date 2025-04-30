@@ -9,21 +9,9 @@ module RailsSoftLock
   # Adapter for store lock in redis
   module RedisAdapter
     # Initialize Redis client
-    def redis_client # rubocop:disable Metrics/MethodLength
+    def redis_client
       @redis_client ||= begin
-        redis_config = RailsSoftLock.configuration.adapter_options.fetch(:redis, {})
-
-        # Set config defaults
-        defaults = {
-          url: "redis://localhost:6379/0",
-          timeout: 5
-        }
-        # Merge config options
-        config = defaults.merge(redis_config)
-
-        ConnectionPool::Wrapper.new do
-          Redis.new(**config)
-        end
+        ConnectionPool::Wrapper.new { Redis.new(**RailsSoftLock.configuration.adapter_options[:redis]) }
       rescue Redis::CannotConnectError => e
         raise RailsSoftLock::Error, "Failed to connect to Redis: #{e.message}"
       end

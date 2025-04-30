@@ -7,17 +7,19 @@ module RailsSoftLock
     # Supported storage adapters.
     VALID_ADAPTERS = %i[redis nats memcached].freeze
 
-    attr_reader :adapter
-    # :reek:Attribute
-    attr_accessor :adapter_options
+    attr_reader :adapter, :adapter_options
     # :reek:Attribute
     attr_writer :locked_by_class
 
     # Initializes configuration with default values.
     def initialize
       @adapter = :redis
-      @adapter_options ||= RedisConfig.default_adapter_options
+      @adapter_options = RedisConfig.default_adapter_options
       @locked_by_class = locked_by_class || "User"
+    end
+
+    def adapter_options=(options = {})
+      @adapter_options = options.empty? ? RedisConfig.default_adapter_options : options
     end
 
     # Returns the locker class constant (e.g., User).

@@ -87,28 +87,32 @@ module RailsSoftLock
     #
     # @return [Object]
     def object_key
-      attribute = self.class.locked_attribute
-      unless respond_to? attribute
+      model = self.class
+      attribute = model.locked_attribute
+
+      if (value = try(attribute))
+        value
+      else
         raise NoMethodError,
-              "[RailsSoftLock.object_key] Model #{self.class} not respond to :#{attribute}"
+              "[RailsSoftLock.object_key] Model #{model} does not respond to :#{attribute}"
       end
-      send(attribute)
     end
 
     private
 
     def lock_object_for(user)
-      RailsSoftLock::LockObject.new(
-        object_name: object_name,
-        object_key: object_key,
-        object_value: user.id.to_s
-      )
+      build_lock_object(object_value: user.id.to_s)
     end
 
     def base_lock_object
+      build_lock_object
+    end
+
+    def build_lock_object(object_value: nil)
       RailsSoftLock::LockObject.new(
         object_name: object_name,
-        object_key: object_key
+        object_key: object_key,
+        object_value: object_value
       )
     end
   end
