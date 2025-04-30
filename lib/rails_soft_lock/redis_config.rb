@@ -56,7 +56,7 @@ module RailsSoftLock
     # @return [Boolean]
     # @api private
     def rails_config_available?
-      !!Rails.application.try(:config_for)
+      !!Rails.application.try(:config_for, :redis)
     end
   end
 end
