@@ -18,6 +18,13 @@ module RailsSoftLock
       { redis: config_with_defaults }
     end
 
+    # The default Redis connection settings
+    # @return [Hash]
+    # @api private
+    def default_settings
+      { url: "redis://localhost:6379/0", timeout: 5 }
+    end
+
     # Merges default settings with any Rails-specific configuration
     # @return [Hash] Complete Redis configuration
     # @note Will return just defaults if Rails isn't available
@@ -50,13 +57,6 @@ module RailsSoftLock
     # @api private
     def rails_config_available?
       !!Rails.application.try(:config_for)
-    end
-
-    # The default Redis connection settings
-    # @return [Hash]
-    # @api private
-    def default_settings
-      { url: "redis://localhost:6379/0", timeout: 5 }
     end
   end
 end

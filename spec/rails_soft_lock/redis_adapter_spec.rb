@@ -62,7 +62,7 @@ RSpec.describe RailsSoftLock::RedisAdapter do
       it "uses default options if configuration is empty" do
         RailsSoftLock.configure do |config|
           config.adapter = :redis
-          config.adapter_options = { redis: {} }
+          config.adapter_options = {}
         end
 
         adapter.redis_client

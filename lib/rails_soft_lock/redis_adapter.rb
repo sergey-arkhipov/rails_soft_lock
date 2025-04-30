@@ -11,7 +11,7 @@ module RailsSoftLock
     # Initialize Redis client
     def redis_client
       @redis_client ||= begin
-        ConnectionPool::Wrapper.new { Redis.new(**RailsSoftLock.configuration.redis_config) }
+        ConnectionPool::Wrapper.new { Redis.new(**RailsSoftLock.configuration.adapter_options[:redis]) }
       rescue Redis::CannotConnectError => e
         raise RailsSoftLock::Error, "Failed to connect to Redis: #{e.message}"
       end

@@ -7,17 +7,19 @@ module RailsSoftLock
     # Supported storage adapters.
     VALID_ADAPTERS = %i[redis nats memcached].freeze
 
-    attr_reader :adapter
-    # :reek:Attribute
-    attr_accessor :adapter_options
+    attr_reader :adapter, :adapter_options
     # :reek:Attribute
     attr_writer :locked_by_class
 
     # Initializes configuration with default values.
     def initialize
       @adapter = :redis
-      @adapter_options ||= RedisConfig.default_adapter_options
+      @adapter_options = RedisConfig.default_adapter_options
       @locked_by_class = locked_by_class || "User"
+    end
+
+    def adapter_options=(options = {})
+      @adapter_options = options.empty? ? RedisConfig.default_adapter_options : options
     end
 
     # Returns the locker class constant (e.g., User).
@@ -36,15 +38,6 @@ module RailsSoftLock
       raise ArgumentError, "Adapter must be one of: #{VALID_ADAPTERS.join(", ")}" unless VALID_ADAPTERS.include?(value)
 
       @adapter = value
-    end
-
-    # Returns Redis configuration with defaults merged with adapter options.
-    #
-    # @return [Hash]
-    def redis_config
-      redis_config = adapter_options.fetch(:redis, {})
-      defaults = { url: "redis://localhost:6379/0", timeout: 5 }
-      defaults.merge(redis_config)
     end
   end
 end
