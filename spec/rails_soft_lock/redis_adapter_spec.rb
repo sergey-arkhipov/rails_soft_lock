@@ -103,8 +103,8 @@ RSpec.describe RailsSoftLock::RedisAdapter do
         expect(adapter.get).to eq(object_value)
       end
 
-      it "returns false about existence pair" do
-        expect(adapter.create).to be false
+      it "returns true about existence pair" do
+        expect(adapter.create).to be true
       end
     end
 
@@ -116,9 +116,9 @@ RSpec.describe RailsSoftLock::RedisAdapter do
         expect(adapter.get).to eq(object_value)
       end
 
-      it "returns true" do
+      it "returns false" do
         adapter.object_value = "new_value"
-        expect(adapter.create).to be true
+        expect(adapter.create).to be false
       end
     end
   end

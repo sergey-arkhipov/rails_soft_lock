@@ -30,7 +30,7 @@ module RailsSoftLock
         transaction.hsetnx(@object_name, @object_key, @object_value)
         transaction.hget(@object_name, @object_key)
       end
-      !result.first # has_locked - false id created
+      result.first # true on creation, false otherwise
     end
 
     # Updates the value for an existing key or creates a new key-value pair
