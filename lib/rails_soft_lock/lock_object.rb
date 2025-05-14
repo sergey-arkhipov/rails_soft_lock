@@ -46,7 +46,7 @@ module RailsSoftLock
     # @return [Hash] { has_locked: Boolean, locked_by: String or nil }
     def lock_or_find
       locked_object = get
-      { has_locked: create, locked_by: locked_object || object_value }
+      { has_locked: !create, locked_by: locked_object || object_value }
     end
 
     # Unlocks the object
