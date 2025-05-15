@@ -16,7 +16,7 @@ module RailsSoftLock
       return client if client.present?
 
       ConnectionPool::Wrapper.new do
-        Dalli::Client.new(RailsSoftLock.configuration.adapter_options.dig(:memcached, :servers) || "127.0.0.1:11211",
+        Dalli::Client.new(RailsSoftLock.configuration.adapter_options.dig(:memcached, :servers) || "localhost:11211",
                           **RailsSoftLock.configuration.adapter_options.dig(:memcached, :options))
       end
     rescue Dalli::RingError => e

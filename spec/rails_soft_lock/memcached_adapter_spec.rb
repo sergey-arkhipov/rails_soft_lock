@@ -24,7 +24,7 @@ Params = Struct.new(:name, :key, :value)
 
 RSpec.describe RailsSoftLock::MemcachedAdapter do
   let(:object_params) { Params.new("test_locks", "key1", "value1") }
-  let(:options) { { servers: ENV["MEMCACHED_URL"] || "127.0.0.1:11211", options: { namespace: "test-model" } } }
+  let(:options) { { servers: ENV["MEMCACHED_URL"] || "localhost:11211", options: { namespace: "test-model" } } }
   let(:adapter) do
     MemcachedAdapterTest.new(object_name: object_params.name,
                              object_key: object_params.key,
@@ -50,8 +50,8 @@ RSpec.describe RailsSoftLock::MemcachedAdapter do
         allow(ConnectionPool::Wrapper).to receive(:new) do |&block|
           # Два метода alllow чтобы избежать ошибки
           # "Please stub a default value first if message might be received with other args as well"
-          allow(Dalli::Client).to receive(:new).with("127.0.0.1:11211").and_return(instance_double(Dalli::Client))
-          allow(Dalli::Client).to receive(:new).with("127.0.0.1:11211", **options[:options])
+          allow(Dalli::Client).to receive(:new).with("localhost:11211").and_return(instance_double(Dalli::Client))
+          allow(Dalli::Client).to receive(:new).with("localhost:11211", **options[:options])
                               .and_return(instance_double(Dalli::Client))
           block.call
         end.and_return(instance_double(ConnectionPool::Wrapper))
