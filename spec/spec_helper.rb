@@ -2,6 +2,7 @@
 
 require "rails_soft_lock"
 require "support/rails_soft_lock"
+require "rails_soft_lock/shared_examples/adapter_example"
 require "redis"
 require "bundler/setup"
 require "active_record"

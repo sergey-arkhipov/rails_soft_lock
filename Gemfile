@@ -11,6 +11,7 @@ gem "bundler"
 group :development, :test do
   gem "byebug"
   gem "connection_pool"
+  gem "dalli"
   gem "debug"
   gem "irb"
   gem "pry"
