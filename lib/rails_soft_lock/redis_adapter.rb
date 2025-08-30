@@ -35,14 +35,14 @@ module RailsSoftLock
 
     # Updates the value for an existing key or creates a new key-value pair
     # @return [Boolean] true if the key was updated, false if it was created
-    def update
+    def update # rubocop:disable Naming/PredicateMethod
       result = redis_client.hset(@object_name, @object_key, @object_value)
       result.zero?
     end
 
     # Deletes a key from the specified hash
     # @return [Boolean] true if the key was deleted, false if it did not exist
-    def delete
+    def delete # rubocop:disable Naming/PredicateMethod
       result = redis_client.hdel(@object_name, @object_key)
       !result.zero?
     end
