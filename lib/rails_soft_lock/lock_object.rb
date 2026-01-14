@@ -33,7 +33,7 @@ module RailsSoftLock
     def initialize(object_name:, object_key: nil, object_value: nil)
       @object_name = object_name
       @object_key = object_key
-      @object_value = object_value.present? ? object_value.to_s : nil # Convert to string for consistency
+      @object_value = object_value.presence&.to_s # Convert to string for consistency
     end
 
     # Returns the ID of the locker who locked the object
