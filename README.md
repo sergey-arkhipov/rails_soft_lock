@@ -4,7 +4,7 @@
 
 The RailsSoftLock gem provides group-level locking for Rails ApplicationRecord objects based on a shared attribute. Instead of individually locking each database record (which can be expensive and complex), it creates and manages a single in-memory lock for the entire group via the attribute. This reduces database contention while maintaining thread safety.
 
-### Key Features
+## Key Features
 
     Lightweight Group Locking:
 
@@ -23,6 +23,16 @@ The RailsSoftLock gem provides group-level locking for Rails ApplicationRecord o
         Can also mark/tag groups of records (e.g., flag all records with project_id=123 as "favorites").
 
         Useful for batch operations or state management (e.g., "processing", "archived").
+
+    Lock Expiration (TTL):
+
+        Lock keys automatically expire after a configurable TTL, protecting against stuck/abandoned locks (e.g., a crashed process that never released one).
+
+        Default TTL is 12 hours (43200 seconds).
+
+        Configurable via the RAILS_SOFT_LOCK_TTL environment variable (in seconds), via config/redis.yml (ttl key), or per lock instance.
+
+        Set TTL to 0 to disable expiration entirely.
 
 ### Current Status
 
@@ -141,6 +151,26 @@ Key Points:
 { has_locked: true, locked_by: <existing_lock_user_id> }
 
 In this case, the lock remains unchanged (no new lock is set).
+
+### Lock TTL
+
+By default, locks expire automatically after 12 hours to guard against stuck locks
+(e.g., a process crashing before releasing one). Override this globally:
+
+```bash
+# .env or shell
+RAILS_SOFT_LOCK_TTL=3600 # 1 hour, in seconds
+```
+
+or in `config/redis.yml`:
+
+```yaml
+default: &default
+  url: redis://localhost:6379/0
+  ttl: 3600
+```
+
+Set `RAILS_SOFT_LOCK_TTL=0` to disable TTL entirely (locks will never expire automatically).
 
 ## Development
 

@@ -192,4 +192,69 @@ RSpec.describe RailsSoftLock::LockObject, adapter: :redis do
       end
     end
   end
+
+  describe "TTL handling" do
+    let(:redis) { Redis.new(url: ENV["REDIS_URL"] || "redis://localhost:6379/0") }
+
+    after do
+      ENV.delete("RAILS_SOFT_LOCK_TTL")
+    end
+
+    context "with the default TTL" do
+      it "sets the default TTL (12 hours) on the key" do
+        lock_object.lock_or_find
+        expect(redis.ttl(object_name)).to be_within(5).of(RailsSoftLock::RedisConfig::DEFAULT_TTL)
+      end
+    end
+
+    context "when RAILS_SOFT_LOCK_TTL is set" do
+      around do |example|
+        ENV["RAILS_SOFT_LOCK_TTL"] = "60"
+        example.run
+        ENV.delete("RAILS_SOFT_LOCK_TTL")
+      end
+
+      it "applies the TTL from the environment variable" do
+        lock_object.lock_or_find
+        expect(redis.ttl(object_name)).to be_within(2).of(60)
+      end
+    end
+
+    context "when ttl: 0 is passed explicitly" do
+      let(:lock_object) do
+        described_class.new(object_name: object_name, object_key: object_key,
+                            object_value: object_value, ttl: 0)
+      end
+
+      it "does not set an expiration on the key" do
+        lock_object.lock_or_find
+        expect(redis.ttl(object_name)).to eq(-1)
+      end
+    end
+
+    context "when a custom ttl is passed to the instance" do
+      let(:lock_object) do
+        described_class.new(object_name: object_name, object_key: object_key,
+                            object_value: object_value, ttl: 120)
+      end
+
+      it "overrides the default/ENV TTL" do
+        lock_object.lock_or_find
+        expect(redis.ttl(object_name)).to be_within(2).of(120)
+      end
+    end
+
+    context "when repeated lock_or_find calls" do
+      it "refreshes (extends) the TTL each time" do
+        lock_object.lock_or_find
+        sleep 1
+        first_ttl = redis.ttl(object_name)
+
+        lock_object.lock_or_find # second call, key already exists
+        second_ttl = redis.ttl(object_name)
+
+        expect(second_ttl).to be >= first_ttl
+      end
+    end
+  end
 end
