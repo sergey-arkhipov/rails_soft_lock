@@ -29,6 +29,9 @@ module RailsSoftLock
       result = redis_client.multi do |transaction|
         transaction.hsetnx(@object_name, @object_key, @object_value)
         transaction.hget(@object_name, @object_key)
+        # Apply TTL to the whole key within the same transaction, but only
+        # when it's positive — 0 means "no expiration"
+        transaction.expire(@object_name, @ttl) if @ttl.to_i.positive?
       end
       result.first # true on creation, false otherwise
     end
