@@ -14,7 +14,7 @@ module Rails
   end
 end
 
-RSpec.describe "RailsSoftLock Installation" do # # rubocop:disable RSpec/DescribeClass
+RSpec.describe "RailsSoftLock Installation" do # rubocop:disable RSpec/DescribeClass
   let(:initializer_path) { File.join(Dir.tmpdir, "config", "initializers", "rails_soft_lock.rb") }
   let(:config_dir) { File.dirname(initializer_path) }
 
@@ -58,7 +58,7 @@ RSpec.describe "RailsSoftLock Installation" do # # rubocop:disable RSpec/Describ
 
       output = capture_output { Rake::Task["rails_soft_lock:install"].invoke }
 
-      expect(output).to match(/already exists/)
+      expect(output).to include("already exists")
       expect(File.read(initializer_path)).to eq(original_content)
     end
   end
