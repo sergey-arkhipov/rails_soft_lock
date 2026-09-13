@@ -193,17 +193,24 @@ RSpec.describe RailsSoftLock::LockObject, adapter: :redis do
     end
   end
 
+  # rubocop:disable-next RSpec/MultipleMemoizedHelpers
   describe "TTL handling" do
     let(:redis) { Redis.new(url: ENV["REDIS_URL"] || "redis://localhost:6379/0") }
 
-    after do
-      ENV.delete("RAILS_SOFT_LOCK_TTL")
+    # HTTL returns an array (one entry per requested field); we always ask for one field
+    def field_ttl
+      redis.call("HTTL", object_name, "FIELDS", "1", object_key).first
     end
 
     context "with the default TTL" do
-      it "sets the default TTL (12 hours) on the key" do
+      it "sets the default TTL (12 hours) on the field" do
         lock_object.lock_or_find
-        expect(redis.ttl(object_name)).to be_within(5).of(RailsSoftLock::RedisConfig::DEFAULT_TTL)
+        expect(field_ttl).to be_within(5).of(RailsSoftLock::RedisConfig::DEFAULT_TTL)
+      end
+
+      it "does not set a TTL on the hash key itself" do
+        lock_object.lock_or_find
+        expect(redis.ttl(object_name)).to eq(-1)
       end
     end
 
@@ -216,7 +223,7 @@ RSpec.describe RailsSoftLock::LockObject, adapter: :redis do
 
       it "applies the TTL from the environment variable" do
         lock_object.lock_or_find
-        expect(redis.ttl(object_name)).to be_within(2).of(60)
+        expect(field_ttl).to be_within(2).of(60)
       end
     end
 
@@ -226,9 +233,9 @@ RSpec.describe RailsSoftLock::LockObject, adapter: :redis do
                             object_value: object_value, ttl: 0)
       end
 
-      it "does not set an expiration on the key" do
+      it "does not set an expiration on the field" do
         lock_object.lock_or_find
-        expect(redis.ttl(object_name)).to eq(-1)
+        expect(field_ttl).to eq(-1)
       end
     end
 
@@ -240,20 +247,24 @@ RSpec.describe RailsSoftLock::LockObject, adapter: :redis do
 
       it "overrides the default/ENV TTL" do
         lock_object.lock_or_find
-        expect(redis.ttl(object_name)).to be_within(2).of(120)
+        expect(field_ttl).to be_within(2).of(120)
       end
     end
 
-    context "when repeated lock_or_find calls" do
-      it "refreshes (extends) the TTL each time" do
-        lock_object.lock_or_find
-        sleep 1
-        first_ttl = redis.ttl(object_name)
+    context "with multiple locks in the same group" do
+      let(:other_key) { "key2" }
+      let(:other_lock) do
+        described_class.new(object_name: object_name, object_key: other_key,
+                            object_value: "locker2", ttl: 5)
+      end
 
-        lock_object.lock_or_find # second call, key already exists
-        second_ttl = redis.ttl(object_name)
+      it "only expires the field it was set on, not the whole group", :aggregate_failures do
+        lock_object.lock_or_find # default 12h TTL on object_key
+        other_lock.lock_or_find  # 5s TTL on other_key
 
-        expect(second_ttl).to be >= first_ttl
+        expect(field_ttl).to be_within(5).of(RailsSoftLock::RedisConfig::DEFAULT_TTL)
+        other_field_ttl = redis.call("HTTL", object_name, "FIELDS", "1", other_key).first
+        expect(other_field_ttl).to be_within(2).of(5)
       end
     end
   end

@@ -26,14 +26,9 @@ module RailsSoftLock
     # Creates a new key-value pair if the key does not exist
     # @return [Boolean] true if the key was created, false if it already existed
     def create
-      result = redis_client.multi do |transaction|
-        transaction.hsetnx(@object_name, @object_key, @object_value)
-        transaction.hget(@object_name, @object_key)
-        # Apply TTL to the whole key within the same transaction, but only
-        # when it's positive — 0 means "no expiration"
-        transaction.expire(@object_name, @ttl) if @ttl.to_i.positive?
-      end
-      result.first # true on creation, false otherwise
+      created = create_field
+      apply_ttl if created
+      created # true on creation, false otherwise
     end
 
     # Updates the value for an existing key or creates a new key-value pair
@@ -54,6 +49,23 @@ module RailsSoftLock
     # @return [Hash] The key-value pairs in the hash
     def all
       redis_client.hgetall(@object_name)
+    end
+
+    private
+
+    def create_field
+      redis_client.multi do |transaction|
+        transaction.hsetnx(@object_name, @object_key, @object_value)
+        transaction.hget(@object_name, @object_key)
+      end.first
+    end
+
+    # Sets TTL on this specific hash field only, not on the whole group hash,
+    # since @object_name can hold multiple unrelated locks as separate fields
+    def apply_ttl
+      return unless @ttl.to_i.positive?
+
+      redis_client.call("HEXPIRE", @object_name, @ttl.to_s, "FIELDS", "1", @object_key)
     end
   end
 end
