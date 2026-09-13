@@ -12,6 +12,19 @@ module Rails
   def self.root
     Pathname.new(Dir.tmpdir)
   end
+
+  def self.application
+    @application ||= FakeApplication.new
+  end
+
+  # Simple stand-in for Rails.application, just enough for config_for
+  class FakeApplication
+    attr_writer :redis_config
+
+    def config_for(_name)
+      @redis_config || {}
+    end
+  end
 end
 
 RSpec.describe "RailsSoftLock Installation" do # rubocop:disable RSpec/DescribeClass
@@ -47,7 +60,9 @@ RSpec.describe "RailsSoftLock Installation" do # rubocop:disable RSpec/DescribeC
           include(
             "RailsSoftLock.configure do |config|",
             "config.adapter = :redis",
-            "timeout: 5"
+            "timeout: 5",
+            ".except(:ttl)",
+            "RAILS_SOFT_LOCK_TTL"
           )
         )
     end
@@ -65,6 +80,7 @@ RSpec.describe "RailsSoftLock Installation" do # rubocop:disable RSpec/DescribeC
 
   describe "configuration loading" do
     it "applies configuration from initializer", :aggregate_failures do # rubocop:disable RSpec/ExampleLength
+      stub_const("User", Class.new)
       # Prepare configuration
       config_content = <<~RUBY
         RailsSoftLock.configure do |config|
@@ -83,6 +99,21 @@ RSpec.describe "RailsSoftLock Installation" do # rubocop:disable RSpec/DescribeC
       expect(config.adapter).to eq(:redis)
       expect(config.adapter_options).to eq(redis: { url: "redis://localhost:6379/0", timeout: 5 })
       expect(config.locked_by_class).to eq(User)
+    end
+
+    it "reads ttl from config/redis.yml via RedisConfig.default_ttl" do # rubocop:disable RSpec/ExampleLength
+      config_content = <<~RUBY
+        RailsSoftLock.configure do |config|
+          config.adapter = :redis
+          config.adapter_options = { redis: { url: "redis://localhost:6379/0", timeout: 5 } }
+        end
+      RUBY
+
+      File.write(initializer_path, config_content)
+      load initializer_path
+
+      allow(Rails.application).to receive(:config_for).with(:redis).and_return(ttl: 120)
+      expect(RailsSoftLock::RedisConfig.default_ttl).to eq(120)
     end
   end
 
