@@ -65,6 +65,10 @@ module RailsSoftLock
     def apply_ttl
       return unless @ttl.to_i.positive?
 
+      # HEXPIRE <key> <seconds> FIELDS <numfields> <field...>
+      # Sets TTL on a single hash field (not the whole hash key), so that
+      # unrelated locks sharing the same @object_name hash aren't affected.
+      # Requires Redis/Valkey >= 7.4.
       redis_client.call("HEXPIRE", @object_name, @ttl.to_s, "FIELDS", "1", @object_key)
     end
   end
