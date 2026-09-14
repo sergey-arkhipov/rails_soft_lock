@@ -25,6 +25,14 @@ module RailsSoftLock
 
     # Creates a new key-value pair if the key does not exist
     # @return [Boolean] true if the key was created, false if it already existed
+    # Note: field creation and TTL application are two separate Redis calls
+    # (not a single atomic operation). In the rare case a process crashes
+    # between them, the lock field would persist without a TTL. This is an
+    # accepted trade-off: TTL here is a best-effort cleanup convenience, not
+    # a strict consistency guarantee — a Redis restart/redeploy will clear
+    # stale locks regardless. If atomicity becomes a hard requirement, see
+    # HSETEX (Redis >= 8.0) or wrap creation+TTL in a Lua script (EVAL).
+
     def create
       created = create_field
       apply_ttl if created
@@ -33,6 +41,11 @@ module RailsSoftLock
 
     # Updates the value for an existing key or creates a new key-value pair
     # @return [Boolean] true if the key was updated, false if it was created
+    # @note TTL is intentionally NOT (re)applied here. This method is currently
+    #   part of the adapter's generic interface but is not exposed through
+    #   LockObject's public API (see LockObject#lock_or_find/#unlock/#all_locks).
+    #   If it becomes user-facing, TTL handling should mirror #create — see the
+    #   TTL trade-off note there before wiring it in.
     def update # rubocop:disable Naming/PredicateMethod
       result = redis_client.hset(@object_name, @object_key, @object_value)
       result.zero?

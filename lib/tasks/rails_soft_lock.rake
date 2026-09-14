@@ -22,8 +22,8 @@ namespace :rails_soft_lock do
 
           # Configuration for the redis adapter
           # Note: :ttl is excluded here on purpose — it's not a Redis connection
-          # option. It's read separately via RailsSoftLock::RedisConfig.default_ttl
-          # (see below).
+          # option and would break RedisClient.new if passed through. Lock TTL is
+          # configured separately, see the note below.
           config.adapter_options = {
             redis: Rails.application.config_for(:redis).to_h.except(:ttl).merge(
               timeout: 5
@@ -39,12 +39,11 @@ namespace :rails_soft_lock do
           # (Optional) Model class for locked_by lookups
           # config.locked_by_class = "User"
 
-          # (Optional) TTL (in seconds) for lock keys, protecting against stuck locks.
-          # Default is 12 hours. Set to 0 to disable expiration.
-          # Can also be overridden via the RAILS_SOFT_LOCK_TTL environment variable,
-          # or via the `ttl:` key in config/redis.yml.
-          # config.adapter_options[:redis][:ttl] = 3600
         end
+        # (Optional) TTL (in seconds) for lock keys, protecting against stuck locks.
+        # Default is 12 hours. Set to 0 to disable expiration.
+        # Configure via the RAILS_SOFT_LOCK_TTL environment variable, or via the
+        # `ttl:` key in config/redis.yml — NOT via config.adapter_options.
       RUBY
       puts "Created RailsSoftLock configuration file at #{initializer_path}"
     end
