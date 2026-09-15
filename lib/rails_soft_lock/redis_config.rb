@@ -10,6 +10,10 @@ module RailsSoftLock
   module RedisConfig
     module_function
 
+    # Add possibility to set TTL for lock objects
+    # Set to 0 (via ENV or Rails config) to disable TTL entirely
+    DEFAULT_TTL = 43_200 # seconds, 12 hours
+
     # Returns the complete Redis adapter options hash
     # @return [Hash] Options hash with :redis key containing configuration
     # @example
@@ -25,12 +29,22 @@ module RailsSoftLock
       { url: "redis://localhost:6379/0", timeout: 5 }
     end
 
+    # TTL (in seconds) applied to lock keys as a safety net against stuck locks
+    # Priority: ENV var > Rails config/redis.yml (:ttl key) > DEFAULT_TTL
+    # A value of 0 means "no TTL" (locks never expire automatically)
+    # @return [Integer]
+    def default_ttl
+      rails_ttl = rails_available? ? rails_config[:ttl] : nil
+      Integer(ENV["RAILS_SOFT_LOCK_TTL"] || rails_ttl || DEFAULT_TTL)
+    end
+
     # Merges default settings with any Rails-specific configuration
     # @return [Hash] Complete Redis configuration
     # @note Will return just defaults if Rails isn't available
     def config_with_defaults
       base_config = rails_available? ? rails_config : {}
-      default_settings.merge(base_config)
+      # :ttl is a separate concept, not a Redis connection option, so exclude it here
+      default_settings.merge(base_config.except(:ttl))
     end
 
     # Checks if Rails environment is available and properly configured

@@ -30,10 +30,11 @@ module RailsSoftLock
 
     attr_reader :object_name, :object_key, :object_value
 
-    def initialize(object_name:, object_key: nil, object_value: nil)
+    def initialize(object_name:, object_key: nil, object_value: nil, ttl: RailsSoftLock::RedisConfig.default_ttl)
       @object_name = object_name
       @object_key = object_key
       @object_value = object_value.presence&.to_s # Convert to string for consistency
+      @ttl = ttl
     end
 
     # Returns the ID of the locker who locked the object

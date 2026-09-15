@@ -4,7 +4,7 @@
 
 The RailsSoftLock gem provides group-level locking for Rails ApplicationRecord objects based on a shared attribute. Instead of individually locking each database record (which can be expensive and complex), it creates and manages a single in-memory lock for the entire group via the attribute. This reduces database contention while maintaining thread safety.
 
-### Key Features
+## Key Features
 
     Lightweight Group Locking:
 
@@ -23,6 +23,16 @@ The RailsSoftLock gem provides group-level locking for Rails ApplicationRecord o
         Can also mark/tag groups of records (e.g., flag all records with project_id=123 as "favorites").
 
         Useful for batch operations or state management (e.g., "processing", "archived").
+
+    Lock Expiration (TTL) ⚠️ see "Lock TTL" section below — requires Redis >= 7.4:
+
+        Lock keys automatically expire after a configurable TTL, protecting against stuck/abandoned locks (e.g., a crashed process that never released one).
+
+        Default TTL is 12 hours (43200 seconds).
+
+        Configurable via the RAILS_SOFT_LOCK_TTL environment variable (in seconds), via config/redis.yml (ttl key), or per lock instance.
+
+        Set TTL to 0 to disable expiration entirely.
 
 ### Current Status
 
@@ -141,6 +151,36 @@ Key Points:
 { has_locked: true, locked_by: <existing_lock_user_id> }
 
 In this case, the lock remains unchanged (no new lock is set).
+
+## Lock TTL
+
+**Attention!** This feature requires Redis/Valkey ~> 7.4 (uses `HEXPIRE`/`HTTL` under the hood, which set expiration on individual hash fields rather than the whole key).
+
+By default, lock records expire automatically after 12 hours, protecting against
+stuck/abandoned locks (e.g., a process crashing before releasing one). The TTL
+applies **per lock field**, not to the whole group key — other locks sharing the
+same group (`object_name`) are unaffected when one of them expires.
+
+Override the default globally via the `RAILS_SOFT_LOCK_TTL` environment variable
+(in seconds):
+
+```bash
+RAILS_SOFT_LOCK_TTL=3600 # 1 hour
+```
+
+or via `config/redis.yml`:
+
+```yaml
+default: &default
+  url: redis://localhost:6379/0
+  ttl: 3600
+```
+
+Set `RAILS_SOFT_LOCK_TTL=0` (or `ttl: 0` in `config/redis.yml`) to disable expiration
+entirely — locks will never expire automatically.
+
+If your Redis/Valkey server is older than 7.4, `HEXPIRE` will raise an error. Either
+upgrade the server, or set TTL to `0` to disable this feature until you do.
 
 ## Development
 

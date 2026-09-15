@@ -70,4 +70,63 @@ RSpec.describe RailsSoftLock::RedisConfig do
       expect(described_class.rails_available?).to be false
     end
   end
+
+  describe ".default_ttl" do
+    around do |example|
+      original_ttl = ENV.delete("RAILS_SOFT_LOCK_TTL")
+      example.run
+      ENV["RAILS_SOFT_LOCK_TTL"] = original_ttl if original_ttl
+    end
+
+    context "without Rails and without ENV" do
+      it "returns DEFAULT_TTL" do
+        hide_const("Rails")
+        expect(described_class.default_ttl).to eq(described_class::DEFAULT_TTL)
+      end
+    end
+
+    context "when RAILS_SOFT_LOCK_TTL is set" do
+      before { ENV["RAILS_SOFT_LOCK_TTL"] = "60" }
+
+      it "uses the ENV value" do
+        hide_const("Rails")
+        expect(described_class.default_ttl).to eq(60)
+      end
+    end
+
+    context "with Rails simulation" do
+      let(:rails_app) { double("Rails.application") } # rubocop:disable RSpec/VerifiedDoubles
+
+      before do
+        stub_const("Rails", Class.new)
+        allow(Rails).to receive(:application).and_return(rails_app)
+        allow(rails_app).to receive(:config_for).and_return(true)
+        allow(rails_app).to receive(:config_for)
+          .with(:redis)
+          .and_return("ttl" => 120)
+      end
+
+      it "uses ttl from Rails config when ENV is not set" do
+        expect(described_class.default_ttl).to eq(120)
+      end
+
+      it "prioritizes ENV over Rails config" do
+        ENV["RAILS_SOFT_LOCK_TTL"] = "60"
+        expect(described_class.default_ttl).to eq(60)
+      end
+    end
+  end
+
+  describe ".config_with_defaults excludes ttl" do
+    it "does not include ttl in Redis connection options" do
+      stub_const("Rails", Class.new)
+      allow(Rails).to receive(:application).and_return(double("Rails.application")) # rubocop:disable RSpec/VerifiedDoubles
+      allow(Rails.application).to receive(:config_for).and_return(true)
+      allow(Rails.application).to receive(:config_for)
+        .with(:redis)
+        .and_return("host" => "redis.test", "ttl" => 999)
+
+      expect(described_class.config_with_defaults).not_to have_key(:ttl)
+    end
+  end
 end
